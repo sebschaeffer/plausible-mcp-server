@@ -1,3 +1,5 @@
+import type { QueryPayload } from "./types.js";
+
 const PLAUSIBLE_API_URL =
   process.env.PLAUSIBLE_API_URL || "https://plausible.io/api/v2";
 const PLAUSIBLE_API_KEY = process.env.PLAUSIBLE_API_KEY;
@@ -7,18 +9,14 @@ if (!PLAUSIBLE_API_KEY) {
 }
 
 class PlausibleClient {
-  async query(siteId: string, metrics: string[], dateRange: string) {
+  async query(query: QueryPayload) {
     const response = await fetch(`${PLAUSIBLE_API_URL}/query`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${PLAUSIBLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        site_id: siteId,
-        metrics: metrics,
-        date_range: dateRange,
-      }),
+      body: JSON.stringify(query),
     });
 
     if (!response.ok) {

@@ -4,6 +4,39 @@ MCP Interaction Server for Plausible Analytics
 
 A Model Context Protocol (MCP) server implementation for interacting with the Plausible Analytics API. This server allows AI models to query analytics data from Plausible.
 
+## Tool Usage
+
+Tool name: `plausible_query`
+
+Required fields: `site_id`, `metrics`, and either `date_range` or `date` (single day).
+
+Optional fields: `dimensions`, `filters`, `order_by`, `include`, `pagination`
+
+Example (single day):
+
+```json
+{
+  "site_id": "example.com",
+  "metrics": ["visitors", "pageviews"],
+  "date": "2024-07-01"
+}
+```
+
+Example (dimensions + filters):
+
+```json
+{
+  "site_id": "example.com",
+  "metrics": ["visitors"],
+  "date_range": ["2024-07-01", "2024-07-07"],
+  "dimensions": ["visit:country_name"],
+  "filters": [["is", "visit:country_name", ["Germany"]]],
+  "order_by": [["visitors", "desc"]],
+  "include": { "total_rows": true },
+  "pagination": { "limit": 100, "offset": 0 }
+}
+```
+
 ## Local Development
 
 In order to run this client locally, add the following configuration to your Claude Desktop MCP Server config file: 

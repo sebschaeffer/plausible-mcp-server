@@ -6,7 +6,8 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { QueryArgs, queryTool } from "./plausible/query.js";
+import { queryTool } from "./plausible/query.js";
+import type { QueryArgs, QueryPayload } from "./plausible/types.js";
 import { plausibleClient } from "./plausible/client.js";
 
 const server = new Server(
@@ -38,16 +39,24 @@ server.setRequestHandler(
       switch (request.params.name) {
         case "plausible_query": {
           const args = request.params.arguments as unknown as QueryArgs;
-          if (!args.site_id || !args.metrics || !args.date_range) {
+          if (!args.site_id || !args.metrics) {
             throw new Error(
-              "Missing required arguments: site_id, metrics, and date_range"
+              "Missing required arguments: site_id and metrics"
             );
           }
-          const response = await plausibleClient.query(
-            args.site_id,
-            args.metrics,
-            args.date_range
-          );
+          const dateRange =
+            args.date_range ?? (args.date ? [args.date, args.date] : undefined);
+          if (!dateRange) {
+            throw new Error(
+              "Missing required arguments: date_range (or date for single day)"
+            );
+          }
+          const { date, ...rest } = args;
+          const payload: QueryPayload = {
+            ...rest,
+            date_range: dateRange,
+          };
+          const response = await plausibleClient.query(payload);
           return {
             content: [{ type: "text", text: JSON.stringify(response) }],
           };
